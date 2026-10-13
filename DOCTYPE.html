@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trusted Campus Shield</title>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-hover: #334155;
+      --accent-gold: #d97706;
+      --gold-light: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #020617;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    /* Mobile Container Setup */
+    .app-viewport {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      max-height: 900px;
+      background-color: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    @media (min-width: 500px) {
+      .app-viewport {
+        border-radius: 28px;
+        height: 92vh;
+      }
+    }
+
+    /* Header */
+    header {
+      background-color: var(--card-bg);
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* Scrollable Content Area */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    /* Bottom Navigation */
+    nav.bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 30;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--accent-gold);
+    }
+
+    /* Views Logic */
+    .view-page {
+      display: none;
+    }
+
+    .view-page.active {
+      display: block;
+    }
+
+    /* Card & Components */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background-color: var(--accent-gold);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--gold-light);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--card-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .badge-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-promoted {
+      background: rgba(217, 119, 6, 0.2);
+      color: var(--gold-light);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .product-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .product-img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      background-color: #334155;
+    }
+
+    .product-info {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .product-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-price {
+      font-size: 0.95rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+      margin-top: auto;
+    }
+
+    .search-bar-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .pill {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .pill.active {
+      background-color: var(--accent-gold);
+      color: #fff;
+      border-color: var(--accent-gold);
+    }
+
+    /* Notification Banner */
+    .demo-banner {
+      background: rgba(217, 119, 6, 0.15);
+      border: 1px dashed var(--accent-gold);
+      color: var(--gold-light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modal Backdrop */
+    .modal {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-viewport">
+  <!-- Header -->
+  <header>
+    <div class="brand-title">
+      <i data-lucide="shield-check" style="color: var(--accent-gold)"></i>
+      Trusted Campus Shield
+    </div>
+    <div class="header-actions">
+      <div style="font-size: 0.8rem; color: var(--text-muted);" id="current-campus-display">
+        <i data-lucide="map-pin" style="width:12px; height:12px; display:inline;"></i> UP Main
+      </div>
+      <button class="btn-secondary" style="padding: 6px; border-radius: 50%;" onclick="openCart()">
+        <i data-lucide="shopping-bag" style="width:18px; height:18px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Scrollable Main Content -->
+  <div class="main-content">
+
+    <!-- DEMO DISCLAIMER -->
+    <div class="demo-banner">
+      <i data-lucide="info" style="flex-shrink:0;"></i>
+      <span>Demo Mode: Transactions, security badges, and data are simulated locally[span_5](start_span)[span_5](end_span).</span>
+    </div>
+
+    <!-- VIEW 1: BROWSE MARKETPLACE -->
+    <div id="view-browse" class="view-page active">
+      <div class="search-bar-container">
+        <div class="input-group" style="flex:1; margin:0;">
+          <input type="text" id="search-input" placeholder="Search textbooks, services..." oninput="renderProducts()">
+        </div>
+      </div>
+
+      <div class="filter-pills">
+        <button class="pill active" onclick="setCategory('All', this)">All</button>
+        <button class="pill" onclick="setCategory('Books', this)">Books</button>
+        <button class="pill" onclick="setCategory('Services', this)">Services</button>
+        <button class="pill" onclick="setCategory('Electronics', this)">Electronics</button>
+      </div>
+
+      <div class="product-grid" id="product-grid"></div>
+    </div>
+
+    <!-- VIEW 2: SELL / ADVERTISE LISTING -->
+    <div id="view-sell" class="view-page">
+      <div class="card">
+        <h3>Create New Listing</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Advertise products or student services[span_6](start_span)[span_6](end_span)</p>
+        <form id="sell-form" onsubmit="handleCreateListing(event)">
+          <div class="input-group">
+            <label>Listing Title</label>
+            <input type="text" id="sell-title" required placeholder="e.g. Engineering Mathematics Textbook">
+          </div>
+          <div class="input-group">
+            <label>Category</label>
+            <select id="sell-category">
+              <option value="Books">Books</option>
+              <option value="Services">Services (Tutoring, etc)</option>
+              <option value="Electronics">Electronics</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Price (R)</label>
+            <input type="number" id="sell-price" required placeholder="250">
+          </div>
+          <div class="input-group">
+            <label>Image URL (Optional)</label>
+            <input type="url" id="sell-image" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="input-group">
+            <label>Description</label>
+            <textarea id="sell-desc" rows="3" required placeholder="Condition, edition, pickup details..."></textarea>
+          </div>
+          <div class="input-group" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="sell-promote" style="width:auto;">
+            <label for="sell-promote" style="margin:0;">Promote Listing (+5% Visibility)[span_7](start_span)[span_7](end_span)</label>
+          </div>
+          <button type="submit" class="btn"><i data-lucide="plus-circle"></i> Publish Listing</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- VIEW 3: SAFETY & VERIFICATION -->
+    <div id="view-safety" class="view-page">
+      <div class="card">
+        <h3>Campus Safety Centre</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:4px;">Stay safe while buying and selling on campus[span_8](start_span)[span_8](end_span).</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4>Seller Verification</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted);">Get verified badge using student email[span_9](start_span)[span_9](end_span).</p>
+          </div>
+          <div id="verification-status">
+            <span class="badge-verified"><i data-lucide="shield-check" style="width:12px;"></i> Verified</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4><i data-lucide="shield-alert" style="color:var(--accent-gold); width:16px;"></i> Safety Guidelines</h4>
+        <ul style="font-size: 0.8rem; color: var(--text-muted); margin-left: 18px; margin-top: 8px; display:flex; flex-direction:column; gap:6px;">
+          <li>Meet in public campus locations (e.g., Library, Student Centre).</li>
+          <li>Never share banking pins or real security credentials[span_10](start_span)[span_10](end_span).</li>
+          <li>Use simulated in-app payments to protect funds until pickup[span_11](start_span)[span_11](end_span).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4>Report an Issue / Contact Support</h4>
+        <form onsubmit="handleContactSupport(event)" style="margin-top:8px;">
+          <div class="input-group">
+            <label>Subject</label>
+            <input type="text" id="support-subject" placeholder="Safety issue, listing report..." required>
+          </div>
+          <div class="input-group">
+            <label>Details</label>
+            <textarea id="support-message" rows="2" required></textarea>
+          </div>
+          <button class="btn btn-secondary" type="submit"><i data-lucide="send"></i> Submit Support Enquiry</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- VIEW 4: ORDERS & HISTORY -->
+    <div id="view-orders" class="view-page">
+      <h3>Order History</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom:12px;">Track past purchases and demo transactions[span_12](start_span)[span_12](end_span).</p>
+      <div id="orders-list"></div>
+    </div>
+
+    <!-- VIEW 5: PROFILE & ACCOUNT -->
+    <div id="view-profile" class="view-page">
+      <div class="card" id="profile-card">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- PRODUCT DETAILS VIEW (STACKED OVERLAY) -->
+    <div id="view-product-details" class="view-page">
+      <button class="btn-secondary" onclick="showView('browse')" style="width:auto; padding:6px 12px; margin-bottom:12px;">
+        <i data-lucide="arrow-left" style="width:16px;"></i> Back
+      </button>
+      <div id="product-detail-container"></div>
+    </div>
+
+    <!-- CART / CHECKOUT VIEW -->
+    <div id="view-cart" class="view-page">
+      <button class="btn-secondary" onclick="showView('browse')" style="width:auto; padding:6px 12px; margin-bottom:12px;">
+        <i data-lucide="arrow-left" style="width:16px;"></i> Back
+      </button>
+      <h3>Shopping Cart & Checkout</h3>
+      <div id="cart-items-container" style="margin-top:12px;"></div>
+      <div id="cart-summary-container"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="navTo('browse', this)">
+      <i data-lucide="store"></i>
+      <span>Market</span>
+    </button>
+    <button class="nav-item" onclick="navTo('sell', this)">
+      <i data-lucide="plus-square"></i>
+      <span>Sell</span>
+    </button>
+    <button class="nav-item" onclick="navTo('safety', this)">
+      <i data-lucide="shield"></i>
+      <span>Safety</span>
+    </button>
+    <button class="nav-item" onclick="navTo('orders', this)">
+      <i data-lucide="clock"></i>
+      <span>Orders</span>
+    </button>
+    <button class="nav-item" onclick="navTo('profile', this)">
+      <i data-lucide="user"></i>
+      <span>Account</span>
+    </button>
+  </nav>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal" id="report-modal">
+  <div class="modal-content">
+    <h4>Report Listing</h4>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Why are you reporting this item?[span_13](start_span)[span_13](end_span)</p>
+    <div class="input-group">
+      <select id="report-reason">
+        <option>Prohibited Item</option>
+        <option>Potential Scam / Counterfeit</option>
+        <option>Incorrect Campus Location</option>
+        <option>Offensive Content</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <textarea id="report-text" placeholder="Additional details..." rows="3"></textarea>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-danger" onclick="submitReport()">Submit Report</button>
+      <button class="btn btn-secondary" onclick="closeModal('report-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initial Mock Data Structure
+  const DEFAULT_PRODUCTS = [
+    {
+      id: '1',
+      title: 'Engineering Mathematics 4th Ed',
+      category: 'Books',
+      price: 350,
+      seller: 'Sarah M.',
+      verified: true,
+      promoted: true,
+      campus: 'UP Main',
+      image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
+      description: 'Clean condition, minimal highlighting in Chapter 3. Hardcover.'
+    },
+    {
+      id: '2',
+      title: 'Computer Science Tutoring (Python/Java)',
+      category: 'Services',
+      price: 150,
+      seller: 'David K.',
+      verified: true,
+      promoted: false,
+      campus: 'UP Main',
+      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400',
+      description: 'R150 per hour. Available weekends at the main library or Zoom.'
+    },
+    {
+      id: '3',
+      title: 'Logitech Wireless Mouse & Keyboard',
+      category: 'Electronics',
+      price: 220,
+      seller: 'Alex P.',
+      verified: false,
+      promoted: false,
+      campus: 'UP Hatfield',
+      image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400',
+      description: 'Gently used set. Works via USB receiver. Batteries included.'
+    }
+  ];
+
+  // Application State
+  let state = {
+    user: JSON.parse(localStorage.getItem('tcs_user')) || { loggedIn: true, name: 'Student Demo', campus: 'UP Main', email: 'student@up.ac.za', verified: true },
+    products: JSON.parse(localStorage.getItem('tcs_products')) || DEFAULT_PRODUCTS,
+    cart: JSON.parse(localStorage.getItem('tcs_cart')) || [],
+    orders: JSON.parse(localStorage.getItem('tcs_orders')) || [],
+    currentCategory: 'All',
+    selectedProductId: null
+  };
+
+  function saveState() {
+    localStorage.setItem('tcs_user', JSON.stringify(state.user));
+    localStorage.setItem('tcs_products', JSON.stringify(state.products));
+    localStorage.setItem('tcs_cart', JSON.stringify(state.cart));
+    localStorage.setItem('tcs_orders', JSON.stringify(state.orders));
+  }
+
+  // Navigation Logic
+  function showView(viewId) {
+    document.querySelectorAll('.view-page').forEach(el => el.classList.remove('active'));
+    document.getElementById(`view-${viewId}`).classList.add('active');
+    
+    if(viewId === 'browse') renderProducts();
+    if(viewId === 'orders') renderOrders();
+    if(viewId === 'profile') renderProfile();
+    if(viewId === 'cart') renderCart();
+  }
+
+  function navTo(viewId, btn) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    showView(viewId);
+  }
+
+  function setCategory(cat, pillEl) {
+    document.querySelectorAll('.filter-pills .pill').forEach(el => el.classList.remove('active'));
+    pillEl.classList.add('active');
+    state.currentCategory = cat;
+    renderProducts();
+  }
+
+  // Render Marketplace Products
+  function renderProducts() {
+    const grid = document.getElementById('product-grid');
+    const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
+    
+    let filtered = state.products.filter(p => {
+      const matchesCat = state.currentCategory === 'All' || p.category === state.currentCategory;
+      const matchesSearch = p.title.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+      return matchesCat && matchesSearch;
+    });
+
+    // Promoted listings sorted to top
+    filtered.sort((a, b) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0));
+
+    grid.innerHTML = filtered.map(p => `
+      <div class="product-card" onclick="openProductDetails('${p.id}')">
+        <img src="${p.image}" class="product-img" alt="${p.title}">
+        <div class="product-info">
+          ${p.promoted ? '<span class="badge-promoted" style="align-self:flex-start; margin-bottom:4px;">Promoted</span>' : ''}
+          <div class="product-title">${p.title}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">
+            ${p.verified ? '<span class="badge-verified"><i data-lucide="shield-check" style="width:10px;"></i> Verified</span>' : ''}
+          </div>
+          <div class="product-price">R ${p.price}</div>
+        </div>
+      </div>
+    `).join('');
+
+    lucide.createIcons();
+  }
+
+  // Detail View Logic
+  function openProductDetails(id) {
+    state.selectedProductId = id;
+    const prod = state.products.find(p => p.id === id);
+    if (!prod) return;
+
+    const container = document.getElementById('product-detail-container');
+    container.innerHTML = `
+      <div class="card" style="padding:0; overflow:hidden;">
+        <img src="${prod.image}" style="width:100%; height:200px; object-fit:cover;">
+        <div style="padding:16px;">
+          ${prod.promoted ? '<span class="badge-promoted">Featured Listing</span>' : ''}
+          <h2 style="margin-top:6px;">${prod.title}</h2>
+          <h3 style="color:var(--accent-gold); margin: 8px 0;">R ${prod.price}</h3>
+          
+          <div style="display:flex; align-items:center; gap:8px; margin: 12px 0; border-top: 1px solid var(--border-color); padding-top: 12px;">
+            <div>
+              <strong style="font-size:0.9rem;">Seller: ${prod.seller}</strong>
+              <div style="margin-top:2px;">
+                ${prod.verified ? '<span class="badge-verified"><i data-lucide="shield-check" style="width:12px;"></i> Verified Campus Seller</span>' : '<span style="font-size:0.75rem; color:var(--text-muted);">Unverified Seller</span>'}
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4; margin-bottom:16px;">${prod.description}</p>
+          
+          <button class="btn" onclick="addToCart('${prod.id}')"><i data-lucide="shopping-bag"></i> Add to Cart</button>
+          
+          <div style="margin-top:12px; display:flex; justify-content:space-between; font-size:0.75rem;">
+            <a href="#" style="color:var(--text-muted);" onclick="openModal('report-modal'); return false;"><i data-lucide="flag" style="width:12px;"></i> Report listing[span_14](start_span)[span_14](end_span)</a>
+            <span style="color:var(--text-muted);"><i data-lucide="map-pin" style="width:12px;"></i> ${prod.campus}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    showView('product-details');
+    lucide.createIcons();
+  }
+
+  // Cart & Checkout
+  function openCart() {
+    showView('cart');
+  }
+
+  function addToCart(prodId) {
+    const prod = state.products.find(p => p.id === prodId);
+    if(prod) {
+      state.cart.push(prod);
+      saveState();
+      alert('Added item to cart[span_15](start_span)[span_15](end_span)!');
+    }
+  }
+
+  function removeFromCart(index) {
+    state.cart.splice(index, 1);
+    saveState();
+    renderCart();
+  }
+
+  function renderCart() {
+    const container = document.getElementById('cart-items-container');
+    const summary = document.getElementById('cart-summary-container');
+
+    if (state.cart.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Your cart is empty.</p>';
+      summary.innerHTML = '';
+      return;
+    }
+
+    let subtotal = state.cart.reduce((sum, item) => sum + item.price, 0);
+    let fee = subtotal * 0.05; // 5% demo service fee[span_16](start_span)[span_16](end_span)
+    let total = subtotal + fee;
+
+    container.innerHTML = state.cart.map((item, idx) => `
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div>
+          <strong style="font-size:0.9rem;">${item.title}</strong>
+          <div style="color:var(--accent-gold); font-size:0.85rem;">R ${item.price}</div>
+        </div>
+        <button class="btn-secondary" style="width:auto; padding:4px 8px;" onclick="removeFromCart(${idx})"><i data-lucide="trash-2" style="width:14px;"></i></button>
+      </div>
+    `).join('');
+
+    summary.innerHTML = `
+      <div class="card" style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem; color:var(--text-muted);">
+          <span>Subtotal</span><span>R ${subtotal.toFixed(2)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem; color:var(--text-muted);">
+          <span>Campus Shield Service Fee (5%)[span_17](start_span)[span_17](end_span)</span><span>R ${fee.toFixed(2)}</span>
+        </div>
+        <hr style="border-color:var(--border-color); margin:8px 0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-weight:700;">
+          <span>Total</span><span style="color:var(--accent-gold);">R ${total.toFixed(2)}</span>
+        </div>
+        <button class="btn" onclick="handleCheckout()"><i data-lucide="credit-card"></i> Pay Now (Simulated)[span_18](start_span)[span_18](end_span)</button>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function handleCheckout() {
+    if (state.cart.length === 0) return;
+    
+    const subtotal = state.cart.reduce((sum, item) => sum + item.price, 0);
+    const fee = subtotal * 0.05;
+    
+    const newOrder = {
+      id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+      date: new Date().toLocaleDateString(),
+      items: [...state.cart],
+      total: subtotal + fee
+    };
+
+    state.orders.unshift(newOrder);
+    state.cart = [];
+    saveState();
+    
+    alert('Payment Simulated Successfully! Order recorded.[span_19](start_span)[span_19](end_span)');
+    showView('orders');
+  }
+
+  // Create Listing Flow
+  function handleCreateListing(e) {
+    e.preventDefault();
+    const title = document.getElementById('sell-title').value;
+    const category = document.getElementById('sell-category').value;
+    const price = parseFloat(document.getElementById('sell-price').value);
+    const image = document.getElementById('sell-image').value || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400';
+    const description = document.getElementById('sell-desc').value;
+    const promoted = document.getElementById('sell-promote').checked;
+
+    const newProduct = {
+      id: Date.now().toString(),
+      title,
+      category,
+      price,
+      seller: state.user.name,
+      verified: state.user.verified,
+      promoted,
+      campus: state.user.campus,
+      image,
+      description
+    };
+
+    state.products.unshift(newProduct);
+    saveState();
+
+    alert('Listing Published Successfully!');
+    document.getElementById('sell-form').reset();
+    showView('browse');
+  }
+
+  // Support & Reports
+  function handleContactSupport(e) {
+    e.preventDefault();
+    alert('Enquiry submitted to Campus Safety Team.[span_20](start_span)[span_20](end_span)');
+    document.getElementById('support-subject').value = '';
+    document.getElementById('support-message').value = '';
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function submitReport() {
+    alert('Report submitted for review. Thank you for keeping campus safe[span_21](start_span)[span_21](end_span)!');
+    closeModal('report-modal');
+  }
+
+  // Render Orders
+  function renderOrders() {
+    const list = document.getElementById('orders-list');
+    if (state.orders.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No orders placed yet.</p>';
+      return;
+    }
+
+    list.innerHTML = state.orders.map(o => `
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">
+          <span><strong>${o.id}</strong></span>
+          <span>${o.date}</span>
+        </div>
+        <div style="font-size:0.85rem; margin-bottom:8px;">
+          ${o.items.map(i => `<div>• ${i.title} (R${i.price})</div>`).join('')}
+        </div>
+        <div style="font-size:0.9rem; font-weight:700; color:var(--accent-gold);">Total Paid: R ${o.total.toFixed(2)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Render Profile View
+  function renderProfile() {
+    const card = document.getElementById('profile-card');
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+        <div style="width:50px; height:50px; border-radius:50%; background:var(--accent-gold); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">
+          ${state.user.name.charAt(0)}
+        </div>
+        <div>
+          <h3>${state.user.name}</h3>
+          <span style="font-size:0.8rem; color:var(--text-muted);">${state.user.email}</span>
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label>Campus Location[span_22](start_span)[span_22](end_span)</label>
+        <select onchange="updateCampus(this.value)">
+          <option value="UP Main" ${state.user.campus === 'UP Main' ? 'selected' : ''}>UP Main Campus</option>
+          <option value="UP Hatfield" ${state.user.campus === 'UP Hatfield' ? 'selected' : ''}>UP Hatfield</option>
+          <option value="UP Hillcrest" ${state.user.campus === 'UP Hillcrest' ? 'selected' : ''}>UP Hillcrest</option>
+        </select>
+      </div>
+
+      <div style="margin-top:16px;">
+        ${state.user.loggedIn ? 
+          `<button class="btn btn-secondary" onclick="toggleAuth()"><i data-lucide="log-out"></i> Log Out[span_23](start_span)[span_23](end_span)</button>` : 
+          `<button class="btn" onclick="toggleAuth()"><i data-lucide="log-in"></i> Log In[span_24](start_span)[span_24](end_span)</button>`}
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function updateCampus(val) {
+    state.user.campus = val;
+    document.getElementById('current-campus-display').innerHTML = `<i data-lucide="map-pin" style="width:12px; height:12px; display:inline;"></i> ${val}`;
+    saveState();
+    lucide.createIcons();
+  }
+
+  function toggleAuth() {
+    state.user.loggedIn = !state.user.loggedIn;
+    saveState();
+    renderProfile();
+  }
+
+  // Init App
+  window.addEventListener('DOMContentLoaded', () => {
+    renderProducts();
+    lucide.createIcons();
+  });
+</script>
+</body>
+</html>
